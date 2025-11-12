@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:pingme/features/auth/bloc/auth_bloc.dart';
 import 'package:pingme/features/rooms/data/models/room_model.dart';
 import 'package:pingme/features/tasks/bloc/task_bloc.dart';
 import 'package:pingme/features/tasks/data/task_repository.dart';
@@ -17,9 +18,14 @@ class RoomDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.read<AuthBloc>().state.user;
+
     return BlocProvider(
-      create: (context) =>
-          TaskBloc(taskRepository: TaskRepository(), roomId: room.id),
+      create: (context) => TaskBloc(
+        taskRepository: TaskRepository(),
+        roomId: room.id,
+        user: user,
+      ),
       child: RoomDetailView(roomName: room.name),
     );
   }

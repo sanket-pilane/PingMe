@@ -39,3 +39,12 @@ class DeleteTask extends TaskEvent {
   @override
   List<Object> get props => [taskId];
 }
+
+// NEW: Event to trigger a nudge
+class SendNudge extends TaskEvent {
+  const SendNudge(this.task);
+  final Task task;
+
+  @override
+  List<Object> get props => [task];
+}

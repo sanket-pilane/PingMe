@@ -22,6 +22,12 @@ class TaskListView extends StatelessWidget {
           itemCount: state.tasks.length,
           itemBuilder: (context, index) {
             final task = state.tasks[index];
+
+            final bool isUrgent =
+                task.needsNudge ||
+                (DateTime.now().difference(task.createdAt).inDays > 3 &&
+                    !task.isComplete);
+
             return Slidable(
               key: Key(task.id),
               startActionPane: ActionPane(
@@ -43,6 +49,20 @@ class TaskListView extends StatelessWidget {
               endActionPane: ActionPane(
                 motion: const StretchMotion(),
                 children: [
+                  if (!task.isComplete)
+                    SlidableAction(
+                      onPressed: (context) {
+                        context.read<TaskBloc>().add(SendNudge(task));
+                      },
+                      backgroundColor: task.needsNudge
+                          ? Colors.orange.shade700
+                          : Colors.amber,
+                      foregroundColor: Colors.white,
+                      icon: task.needsNudge
+                          ? Icons.notifications_active
+                          : Icons.notifications,
+                      label: task.needsNudge ? 'Pending' : 'Nudge',
+                    ),
                   SlidableAction(
                     onPressed: (context) {
                       context.read<TaskBloc>().add(DeleteTask(task.id));
@@ -61,12 +81,18 @@ class TaskListView extends StatelessWidget {
                     decoration: task.isComplete
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
-                    color: task.isComplete ? Colors.grey : null,
+                    color: isUrgent
+                        ? Colors.red.shade700
+                        : task.isComplete
+                        ? Colors.grey
+                        : null,
+                    fontWeight: isUrgent ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                subtitle: Text(
-                  'Added by: ${task.assignedTo.substring(0, 6)}...',
-                ),
+                subtitle: Text('Added by: ${task.assignedToName}'),
+                trailing: task.needsNudge
+                    ? const Icon(Icons.flash_on, color: Colors.amber)
+                    : null,
                 leading: Checkbox(
                   value: task.isComplete,
                   onChanged: (bool? value) {

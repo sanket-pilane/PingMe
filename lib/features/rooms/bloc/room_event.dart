@@ -16,8 +16,8 @@ class RoomsUpdated extends RoomEvent {
   List<Object> get props => [rooms];
 }
 
-class CreateRoom extends RoomEvent {
-  const CreateRoom(this.name);
+class AddRoom extends RoomEvent {
+  const AddRoom(this.name);
   final String name;
 
   @override

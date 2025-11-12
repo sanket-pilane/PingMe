@@ -4,6 +4,7 @@ import 'package:pingme/features/auth/bloc/auth_bloc.dart';
 import 'package:pingme/features/auth/data/auth_repository.dart';
 import 'package:pingme/features/auth/view/login_screen.dart';
 import 'package:pingme/features/home/view/home_screen.dart';
+import 'package:pingme/features/profile/view/profile_setup_screen.dart';
 
 class App extends StatelessWidget {
   const App({super.key, required AuthRepository authRepository})
@@ -30,14 +31,36 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PingMe',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.grey.shade100,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          foregroundColor: Colors.black,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
       home: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state.status == AuthStatus.authenticated) {
-            return const HomeScreen();
-          } else {
+            if (state.user.username.isEmpty) {
+              return const ProfileSetupScreen();
+            } else {
+              return const HomeScreen();
+            }
+          } else if (state.status == AuthStatus.unauthenticated) {
             return const LoginScreen();
+          } else {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
           }
         },
       ),
