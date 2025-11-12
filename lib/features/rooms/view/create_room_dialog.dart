@@ -4,30 +4,30 @@ import 'package:pingme/features/rooms/bloc/room_bloc.dart';
 
 Future<void> showCreateRoomDialog(BuildContext context) {
   final controller = TextEditingController();
-  return showDialog<void>(
+  final roomBloc = context.read<RoomBloc>();
+
+  return showDialog(
     context: context,
-    builder: (BuildContext dialogContext) {
+    builder: (context) {
       return AlertDialog(
-        title: const Text('Create a New Room'),
+        title: const Text('Create New Room'),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(hintText: 'Room Name'),
+          decoration: const InputDecoration(labelText: 'Room Name'),
         ),
-        actions: <Widget>[
+        actions: [
           TextButton(
+            onPressed: () => Navigator.of(context).pop(),
             child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.of(dialogContext).pop();
-            },
           ),
-          ElevatedButton(
-            child: const Text('Create'),
+          TextButton(
             onPressed: () {
               if (controller.text.isNotEmpty) {
-                context.read<RoomBloc>().add(CreateRoom(controller.text));
-                Navigator.of(dialogContext).pop();
+                roomBloc.add(AddRoom(controller.text));
+                Navigator.of(context).pop();
               }
             },
+            child: const Text('Create'),
           ),
         ],
       );

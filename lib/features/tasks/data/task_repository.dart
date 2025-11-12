@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pingme/features/auth/data/models/user_model.dart';
 import 'package:pingme/features/tasks/data/models/task_model.dart';
 
 class TaskRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
 
-  TaskRepository({FirebaseFirestore? firestore, FirebaseAuth? auth})
-    : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance;
+  TaskRepository({FirebaseFirestore? firestore})
+    : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<List<Task>> getTasksStream(String roomId) {
     return _firestore
@@ -22,14 +20,12 @@ class TaskRepository {
         });
   }
 
-  Future<void> createTask(String roomId, String title) async {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) throw Exception('User not logged in');
-
+  Future<void> createTask(String roomId, String title, UserModel user) async {
     final newTask = Task(
       id: '',
       title: title,
-      assignedTo: userId,
+      assignedToId: user.uid,
+      assignedToName: user.username,
       createdAt: DateTime.now(),
     );
 
@@ -58,7 +54,6 @@ class TaskRepository {
         .delete();
   }
 
-  // NEW: Method to set the needsNudge flag
   Future<void> sendNudge(String roomId, Task task) async {
     final updatedTask = task.copyWith(needsNudge: true);
     await updateTask(roomId, updatedTask);

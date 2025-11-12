@@ -4,51 +4,53 @@ import 'package:equatable/equatable.dart';
 class Task extends Equatable {
   final String id;
   final String title;
-  final String assignedTo;
+  final String assignedToId;
+  final String assignedToName;
   final DateTime createdAt;
   final bool isComplete;
-  final bool needsNudge; // <-- NEW: Flag for urgent reminder
+  final bool needsNudge;
 
   const Task({
     required this.id,
     required this.title,
-    required this.assignedTo,
+    required this.assignedToId,
+    required this.assignedToName,
     required this.createdAt,
     this.isComplete = false,
-    this.needsNudge = false, // <-- NEW: Default is false
+    this.needsNudge = false,
   });
 
   @override
   List<Object?> get props => [
     id,
     title,
-    assignedTo,
+    assignedToId,
+    assignedToName,
     createdAt,
     isComplete,
     needsNudge,
   ];
 
-  Task copyWith({
-    bool? isComplete,
-    bool? needsNudge, // <-- NEW
-  }) {
+  Task copyWith({bool? isComplete, bool? needsNudge}) {
     return Task(
       id: id,
       title: title,
-      assignedTo: assignedTo,
+      assignedToId: assignedToId,
+      assignedToName: assignedToName,
       createdAt: createdAt,
       isComplete: isComplete ?? this.isComplete,
-      needsNudge: needsNudge ?? this.needsNudge, // <-- NEW
+      needsNudge: needsNudge ?? this.needsNudge,
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
-      'assignedTo': assignedTo,
+      'assignedToId': assignedToId,
+      'assignedToName': assignedToName,
       'createdAt': Timestamp.fromDate(createdAt),
       'isComplete': isComplete,
-      'needsNudge': needsNudge, // <-- NEW
+      'needsNudge': needsNudge,
     };
   }
 
@@ -57,11 +59,14 @@ class Task extends Equatable {
     return Task(
       id: doc.id,
       title: data['title'] as String,
-      assignedTo: data['assignedTo'] as String,
+      assignedToId:
+          data['assignedToId'] as String? ??
+          data['assignedTo'] as String? ??
+          '',
+      assignedToName: data['assignedToName'] as String? ?? '...',
       createdAt: (data['createdAt'] as Timestamp).toDate(),
-      isComplete: data['isComplete'] as bool,
-      // Handle the case where the field might not exist in old documents
-      needsNudge: data['needsNudge'] as bool? ?? false, // <-- NEW
+      isComplete: data['isComplete'] as bool? ?? false,
+      needsNudge: data['needsNudge'] as bool? ?? false,
     );
   }
 }

@@ -23,7 +23,6 @@ class TaskListView extends StatelessWidget {
           itemBuilder: (context, index) {
             final task = state.tasks[index];
 
-            // Determine if the task is overdue or has been nudged recently
             final bool isUrgent =
                 task.needsNudge ||
                 (DateTime.now().difference(task.createdAt).inDays > 3 &&
@@ -31,7 +30,6 @@ class TaskListView extends StatelessWidget {
 
             return Slidable(
               key: Key(task.id),
-              // Swipe Right: Mark Complete/Undo
               startActionPane: ActionPane(
                 motion: const StretchMotion(),
                 children: [
@@ -48,21 +46,17 @@ class TaskListView extends StatelessWidget {
                   ),
                 ],
               ),
-              // Swipe Left: Delete / Nudge
               endActionPane: ActionPane(
                 motion: const StretchMotion(),
                 children: [
-                  // Nudge Action (Available only if not completed)
                   if (!task.isComplete)
                     SlidableAction(
                       onPressed: (context) {
                         context.read<TaskBloc>().add(SendNudge(task));
                       },
                       backgroundColor: task.needsNudge
-                          ? Colors
-                                .orange
-                                .shade700 // Nudged/Pending
-                          : Colors.amber, // Ready to nudge
+                          ? Colors.orange.shade700
+                          : Colors.amber,
                       foregroundColor: Colors.white,
                       icon: task.needsNudge
                           ? Icons.notifications_active
@@ -88,18 +82,14 @@ class TaskListView extends StatelessWidget {
                         ? TextDecoration.lineThrough
                         : TextDecoration.none,
                     color: isUrgent
-                        ? Colors
-                              .red
-                              .shade700 // Red text for urgent items
+                        ? Colors.red.shade700
                         : task.isComplete
                         ? Colors.grey
                         : null,
                     fontWeight: isUrgent ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
-                subtitle: Text(
-                  'Added by: ${task.assignedTo.substring(0, 6)}...',
-                ),
+                subtitle: Text('Added by: ${task.assignedToName}'),
                 trailing: task.needsNudge
                     ? const Icon(Icons.flash_on, color: Colors.amber)
                     : null,

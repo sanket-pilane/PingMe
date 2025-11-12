@@ -1,55 +1,42 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:pingme/features/auth/data/models/user_model.dart';
 import 'package:pingme/features/rooms/data/models/room_model.dart';
 import 'package:uuid/uuid.dart';
 
 class RoomRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseAuth _auth;
   final Uuid _uuid;
 
-  RoomRepository({FirebaseFirestore? firestore, FirebaseAuth? auth, Uuid? uuid})
+  RoomRepository({FirebaseFirestore? firestore, Uuid? uuid})
     : _firestore = firestore ?? FirebaseFirestore.instance,
-      _auth = auth ?? FirebaseAuth.instance,
       _uuid = uuid ?? const Uuid();
 
-  Stream<List<Room>> getRoomsStream() {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) {
-      return Stream.value([]);
-    }
-
+  Stream<List<Room>> getRoomsStream(String userId) {
     return _firestore
         .collection('rooms')
         .where('members', arrayContains: userId)
-        // .orderBy('createdAt', descending: true) // <-- PROBLEM: Requires a composite index.
-        // We will remove this for now. We can sort on the client-side if needed.
         .snapshots()
         .map((snapshot) {
           final rooms = snapshot.docs
               .map((doc) => Room.fromFirestore(doc))
               .toList();
-          // Since we can't order in Firestore, let's sort them here in Dart.
+          // In-app sort to avoid Firestore index errors
           rooms.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return rooms;
         });
   }
 
-  Future<void> createRoom(String name) async {
-    final userId = _auth.currentUser?.uid;
-    if (userId == null) {
-      throw Exception('User not logged in');
-    }
-
-    final roomId = _uuid.v4();
+  Future<void> createRoom(String name, UserModel user) async {
     final newRoom = Room(
-      id: roomId,
+      id: _uuid.v4(),
       name: name,
-      members: [userId],
-      ownerId: userId,
+      ownerId: user.uid,
+      members: [user.uid],
       createdAt: DateTime.now(),
     );
-
-    await _firestore.collection('rooms').doc(roomId).set(newRoom.toFirestore());
+    await _firestore
+        .collection('rooms')
+        .doc(newRoom.id)
+        .set(newRoom.toFirestore());
   }
 }

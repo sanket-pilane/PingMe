@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:pingme/features/auth/data/models/user_model.dart';
 import 'package:pingme/features/tasks/data/models/task_model.dart';
 import 'package:pingme/features/tasks/data/task_repository.dart';
 
@@ -12,17 +13,22 @@ part 'task_state.dart';
 class TaskBloc extends Bloc<TaskEvent, TaskState> {
   final TaskRepository _taskRepository;
   final String _roomId;
+  final UserModel _user;
   StreamSubscription? _tasksSubscription;
 
-  TaskBloc({required TaskRepository taskRepository, required String roomId})
-    : _taskRepository = taskRepository,
-      _roomId = roomId,
-      super(const TaskState()) {
+  TaskBloc({
+    required TaskRepository taskRepository,
+    required String roomId,
+    required UserModel user,
+  }) : _taskRepository = taskRepository,
+       _roomId = roomId,
+       _user = user,
+       super(const TaskState()) {
     on<TasksUpdated>(_onTasksUpdated);
     on<AddTask>(_onAddTask);
     on<ToggleTaskCompletion>(_onToggleTaskCompletion);
     on<DeleteTask>(_onDeleteTask);
-    on<SendNudge>(_onSendNudge); // <-- NEW
+    on<SendNudge>(_onSendNudge);
 
     _tasksSubscription = _taskRepository.getTasksStream(_roomId).listen((
       tasks,
@@ -37,7 +43,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onAddTask(AddTask event, Emitter<TaskState> emit) async {
     try {
-      await _taskRepository.createTask(_roomId, event.title);
+      await _taskRepository.createTask(_roomId, event.title, _user);
     } catch (e) {
       emit(
         state.copyWith(status: TaskStatus.failure, errorMessage: e.toString()),
@@ -71,10 +77,8 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     }
   }
 
-  // NEW: Handler for sending the nudge
   Future<void> _onSendNudge(SendNudge event, Emitter<TaskState> emit) async {
     try {
-      // The repository updates the flag, which Cloud Functions will watch
       await _taskRepository.sendNudge(_roomId, event.task);
     } catch (e) {
       emit(

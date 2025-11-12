@@ -3,17 +3,20 @@ part of 'auth_bloc.dart';
 enum AuthStatus { authenticated, unauthenticated, unknown }
 
 @immutable
-class AuthState {
+class AuthState extends Equatable {
   final AuthStatus status;
-  final firebase_auth.User? user;
+  final UserModel user;
 
-  const AuthState._({required this.status, this.user});
+  const AuthState._({required this.status, this.user = UserModel.empty});
 
   const AuthState.unknown() : this._(status: AuthStatus.unknown);
 
-  const AuthState.authenticated({required firebase_auth.User user})
+  const AuthState.authenticated({required UserModel user})
     : this._(status: AuthStatus.authenticated, user: user);
 
   const AuthState.unauthenticated()
     : this._(status: AuthStatus.unauthenticated);
+
+  @override
+  List<Object> get props => [status, user];
 }
