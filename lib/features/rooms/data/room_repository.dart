@@ -22,10 +22,16 @@ class RoomRepository {
     return _firestore
         .collection('rooms')
         .where('members', arrayContains: userId)
-        .orderBy('createdAt', descending: true)
+        // .orderBy('createdAt', descending: true) // <-- PROBLEM: Requires a composite index.
+        // We will remove this for now. We can sort on the client-side if needed.
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) => Room.fromFirestore(doc)).toList();
+          final rooms = snapshot.docs
+              .map((doc) => Room.fromFirestore(doc))
+              .toList();
+          // Since we can't order in Firestore, let's sort them here in Dart.
+          rooms.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return rooms;
         });
   }
 
