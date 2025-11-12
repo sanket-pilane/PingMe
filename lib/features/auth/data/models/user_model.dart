@@ -12,29 +12,37 @@ class UserModel extends Equatable {
     required this.username,
   });
 
-  @override
-  List<Object> get props => [uid, email, username];
-
-  factory UserModel.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    final data = doc.data()!;
+  factory UserModel.fromFirestore(DocumentSnapshot doc) {
+    final data = doc.data() as Map<String, dynamic>;
     return UserModel(
       uid: doc.id,
-      email: data['email'] as String,
-      username: data['username'] as String? ?? '',
+      email: data['email'] ?? '',
+      username: data['username'] ?? '',
     );
   }
 
   Map<String, dynamic> toFirestore() {
-    return {'email': email, 'username': username};
-  }
-
-  UserModel copyWith({String? username}) {
-    return UserModel(
-      uid: uid,
-      email: email,
-      username: username ?? this.username,
-    );
+    return {
+      'email': email,
+      'username': username,
+      'username_lowercase': username.toLowerCase(),
+    };
   }
 
   static const empty = UserModel(uid: '', email: '', username: '');
+  bool get isEmpty => this == UserModel.empty;
+  bool get isNotEmpty => this != UserModel.empty;
+
+  // --- THIS IS THE FIX ---
+  UserModel copyWith({String? uid, String? email, String? username}) {
+    return UserModel(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      username: username ?? this.username,
+    );
+  }
+  // --- END OF FIX ---
+
+  @override
+  List<Object> get props => [uid, email, username];
 }

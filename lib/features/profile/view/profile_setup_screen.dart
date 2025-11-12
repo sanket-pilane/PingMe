@@ -11,11 +11,11 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  final _usernameController = TextEditingController();
+  final _controller = TextEditingController();
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -24,32 +24,36 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final authUser = context.select((AuthBloc bloc) => bloc.state.user);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Set Up Your Profile')),
+      appBar: AppBar(title: const Text('Setup Your Profile')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Welcome!', style: Theme.of(context).textTheme.headlineMedium),
-            const SizedBox(height: 8),
-            const Text('Please choose a username to continue.'),
+            Text(
+              'Welcome! Choose a username to continue.',
+              style: Theme.of(context).textTheme.titleLarge,
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 24),
             TextField(
-              controller: _usernameController,
+              controller: _controller,
               decoration: const InputDecoration(
                 labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
-              autofocus: true,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {
-                if (_usernameController.text.isNotEmpty) {
-                  final updatedUser = authUser.copyWith(
-                    username: _usernameController.text,
+                if (_controller.text.isNotEmpty) {
+                  // --- THIS IS THE FIX ---
+                  // We now pass named arguments, not an object.
+                  context.read<AuthRepository>().updateUserProfile(
+                    uid: authUser.uid,
+                    username: _controller.text,
                   );
-                  context.read<AuthRepository>().updateUserProfile(updatedUser);
+                  // --- END OF FIX ---
                 }
               },
               child: const Text('Save and Continue'),

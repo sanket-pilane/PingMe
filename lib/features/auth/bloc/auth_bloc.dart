@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -16,12 +15,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required AuthRepository authRepository})
     : _authRepository = authRepository,
       super(const AuthState.unknown()) {
+    // Listen to the live stream
     _userSubscription = _authRepository.user.listen((user) {
       add(AuthUserChanged(user: user));
     });
 
     on<AuthUserChanged>((event, emit) {
-      if (event.user.uid.isNotEmpty) {
+      // Check if the user is NOT empty
+      if (event.user.isNotEmpty) {
         emit(AuthState.authenticated(user: event.user));
       } else {
         emit(const AuthState.unauthenticated());
