@@ -7,6 +7,7 @@ class Task extends Equatable {
   final String assignedTo;
   final DateTime createdAt;
   final bool isComplete;
+  final bool needsNudge; // <-- NEW: Flag for urgent reminder
 
   const Task({
     required this.id,
@@ -14,18 +15,30 @@ class Task extends Equatable {
     required this.assignedTo,
     required this.createdAt,
     this.isComplete = false,
+    this.needsNudge = false, // <-- NEW: Default is false
   });
 
   @override
-  List<Object?> get props => [id, title, assignedTo, createdAt, isComplete];
+  List<Object?> get props => [
+    id,
+    title,
+    assignedTo,
+    createdAt,
+    isComplete,
+    needsNudge,
+  ];
 
-  Task copyWith({bool? isComplete}) {
+  Task copyWith({
+    bool? isComplete,
+    bool? needsNudge, // <-- NEW
+  }) {
     return Task(
       id: id,
       title: title,
       assignedTo: assignedTo,
       createdAt: createdAt,
       isComplete: isComplete ?? this.isComplete,
+      needsNudge: needsNudge ?? this.needsNudge, // <-- NEW
     );
   }
 
@@ -35,6 +48,7 @@ class Task extends Equatable {
       'assignedTo': assignedTo,
       'createdAt': Timestamp.fromDate(createdAt),
       'isComplete': isComplete,
+      'needsNudge': needsNudge, // <-- NEW
     };
   }
 
@@ -46,6 +60,8 @@ class Task extends Equatable {
       assignedTo: data['assignedTo'] as String,
       createdAt: (data['createdAt'] as Timestamp).toDate(),
       isComplete: data['isComplete'] as bool,
+      // Handle the case where the field might not exist in old documents
+      needsNudge: data['needsNudge'] as bool? ?? false, // <-- NEW
     );
   }
 }

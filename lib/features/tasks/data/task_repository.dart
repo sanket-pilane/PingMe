@@ -57,4 +57,10 @@ class TaskRepository {
         .doc(taskId)
         .delete();
   }
+
+  // NEW: Method to set the needsNudge flag
+  Future<void> sendNudge(String roomId, Task task) async {
+    final updatedTask = task.copyWith(needsNudge: true);
+    await updateTask(roomId, updatedTask);
+  }
 }

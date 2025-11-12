@@ -22,6 +22,7 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     on<AddTask>(_onAddTask);
     on<ToggleTaskCompletion>(_onToggleTaskCompletion);
     on<DeleteTask>(_onDeleteTask);
+    on<SendNudge>(_onSendNudge); // <-- NEW
 
     _tasksSubscription = _taskRepository.getTasksStream(_roomId).listen((
       tasks,
@@ -66,6 +67,21 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
     } catch (e) {
       emit(
         state.copyWith(status: TaskStatus.failure, errorMessage: e.toString()),
+      );
+    }
+  }
+
+  // NEW: Handler for sending the nudge
+  Future<void> _onSendNudge(SendNudge event, Emitter<TaskState> emit) async {
+    try {
+      // The repository updates the flag, which Cloud Functions will watch
+      await _taskRepository.sendNudge(_roomId, event.task);
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: TaskStatus.failure,
+          errorMessage: 'Failed to send nudge: $e',
+        ),
       );
     }
   }
