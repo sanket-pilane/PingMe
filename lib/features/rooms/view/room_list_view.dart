@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pingme/features/rooms/bloc/room_bloc.dart';
+import 'package:pingme/features/rooms/view/room_detail_screen.dart';
 
 class RoomListView extends StatelessWidget {
   const RoomListView({super.key});
@@ -30,7 +31,9 @@ class RoomListView extends StatelessWidget {
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // TODO: Navigate to RoomDetailScreen
+                  Navigator.of(
+                    context,
+                  ).push(RoomDetailScreen.route(room: room));
                 },
               ),
             );

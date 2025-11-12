@@ -30,6 +30,7 @@ class AppView extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'PingMe',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       home: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
