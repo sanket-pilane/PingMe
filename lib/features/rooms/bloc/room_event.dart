@@ -8,14 +8,13 @@ abstract class RoomEvent extends Equatable {
   List<Object> get props => [];
 }
 
-// NEW EVENT: Added this event
 class GetRooms extends RoomEvent {
   const GetRooms();
 }
 
 class RoomsUpdated extends RoomEvent {
   const RoomsUpdated(this.rooms);
-  final List<RoomModel> rooms; // FIXED: Was List<Room>
+  final List<RoomModel> rooms;
 
   @override
   List<Object> get props => [rooms];

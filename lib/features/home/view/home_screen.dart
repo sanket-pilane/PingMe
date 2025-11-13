@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pingme/features/auth/bloc/auth_bloc.dart';
-import 'package:pingme/features/auth/data/models/user_model.dart';
 import 'package:pingme/features/profile/view/settings_screen.dart';
 import 'package:pingme/features/rooms/bloc/room_bloc.dart';
 import 'package:pingme/features/rooms/data/room_repository.dart';

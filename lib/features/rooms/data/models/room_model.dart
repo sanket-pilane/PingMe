@@ -5,6 +5,7 @@ class RoomModel extends Equatable {
   final String id;
   final String name;
   final List<Map<String, dynamic>> members;
+  final List<String> memberUIDs; // <-- ADDED THIS
   final String ownerId;
   final DateTime createdAt;
   final String inviteCode;
@@ -13,6 +14,7 @@ class RoomModel extends Equatable {
     required this.id,
     required this.name,
     required this.members,
+    required this.memberUIDs, // <-- ADDED THIS
     required this.ownerId,
     required this.createdAt,
     required this.inviteCode,
@@ -22,6 +24,7 @@ class RoomModel extends Equatable {
     id: '',
     name: '',
     members: const [],
+    memberUIDs: const [], // <-- ADDED THIS
     ownerId: '',
     createdAt: DateTime(0),
     inviteCode: '',
@@ -33,6 +36,7 @@ class RoomModel extends Equatable {
       id: doc.id,
       name: data['name'] ?? '',
       members: List<Map<String, dynamic>>.from(data['members'] ?? []),
+      memberUIDs: List<String>.from(data['memberUIDs'] ?? []), // <-- ADDED THIS
       ownerId: data['ownerId'] ?? '',
       createdAt: (data['createdAt'] as Timestamp? ?? Timestamp.now()).toDate(),
       inviteCode: data['inviteCode'] ?? '',
@@ -43,6 +47,7 @@ class RoomModel extends Equatable {
     return {
       'name': name,
       'members': members,
+      'memberUIDs': memberUIDs, // <-- ADDED THIS
       'ownerId': ownerId,
       'createdAt': createdAt,
       'inviteCode': inviteCode,
@@ -54,6 +59,7 @@ class RoomModel extends Equatable {
     id,
     name,
     members,
+    memberUIDs, // <-- ADDED THIS
     ownerId,
     createdAt,
     inviteCode,
@@ -63,6 +69,7 @@ class RoomModel extends Equatable {
     String? id,
     String? name,
     List<Map<String, dynamic>>? members,
+    List<String>? memberUIDs, // <-- ADDED THIS
     String? ownerId,
     DateTime? createdAt,
     String? inviteCode,
@@ -71,6 +78,7 @@ class RoomModel extends Equatable {
       id: id ?? this.id,
       name: name ?? this.name,
       members: members ?? this.members,
+      memberUIDs: memberUIDs ?? this.memberUIDs, // <-- ADDED THIS
       ownerId: ownerId ?? this.ownerId,
       createdAt: createdAt ?? this.createdAt,
       inviteCode: inviteCode ?? this.inviteCode,

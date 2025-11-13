@@ -12,14 +12,12 @@ class RoomRepository {
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
   Stream<List<RoomModel>> getRoomsStream(String userId) {
+    //
+    // THE MAIN FIX IS HERE
+    //
     return _firestore
         .collection('rooms')
-        .where(
-          'members',
-          arrayContainsAny: [
-            {'uid': userId},
-          ].map((e) => e).toList(),
-        )
+        .where('memberUIDs', arrayContains: userId) // <-- CHANGED THIS QUERY
         .snapshots()
         .map((snapshot) {
           final rooms = snapshot.docs
@@ -52,6 +50,7 @@ class RoomRepository {
     final newRoom = RoomModel.empty.copyWith(
       name: name,
       members: [memberMap],
+      memberUIDs: [user.uid], // <-- ADDED THIS
       ownerId: user.uid,
       createdAt: DateTime.now(),
       inviteCode: inviteCode,
@@ -72,15 +71,20 @@ class RoomRepository {
     }
 
     final roomDoc = query.docs.first;
-    final members = List<Map<String, dynamic>>.from(
-      roomDoc.data()['members'] ?? [],
-    );
+    final room = RoomModel.fromFirestore(roomDoc);
 
-    final isAlreadyMember = members.any((member) => member['uid'] == user.uid);
+    final isAlreadyMember = room.memberUIDs.contains(
+      user.uid,
+    ); // <-- CLEANER CHECK
 
     if (!isAlreadyMember) {
-      members.add({'uid': user.uid, 'username': user.username});
-      await roomDoc.reference.update({'members': members});
+      final newMemberMap = {'uid': user.uid, 'username': user.username};
+
+      // Update both fields atomically
+      await roomDoc.reference.update({
+        'members': FieldValue.arrayUnion([newMemberMap]),
+        'memberUIDs': FieldValue.arrayUnion([user.uid]),
+      });
     } else {
       throw Exception('Already a member of this room');
     }
