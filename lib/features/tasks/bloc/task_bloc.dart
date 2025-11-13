@@ -24,11 +24,18 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
        _roomId = roomId,
        _user = user,
        super(const TaskState()) {
+    on<GetTasks>(_onGetTasks); // ADDED this handler
     on<TasksUpdated>(_onTasksUpdated);
     on<AddTask>(_onAddTask);
     on<ToggleTaskCompletion>(_onToggleTaskCompletion);
     on<DeleteTask>(_onDeleteTask);
     on<SendNudge>(_onSendNudge);
+  }
+
+  // NEW HANDLER for GetTasks
+  void _onGetTasks(GetTasks event, Emitter<TaskState> emit) {
+    emit(state.copyWith(status: TaskStatus.loading));
+    _tasksSubscription?.cancel();
 
     _tasksSubscription = _taskRepository.getTasksStream(_roomId).listen((
       tasks,

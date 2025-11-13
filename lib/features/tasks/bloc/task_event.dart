@@ -8,6 +8,11 @@ abstract class TaskEvent extends Equatable {
   List<Object> get props => [];
 }
 
+// NEW EVENT: Added this event
+class GetTasks extends TaskEvent {
+  const GetTasks();
+}
+
 class TasksUpdated extends TaskEvent {
   const TasksUpdated(this.tasks);
   final List<Task> tasks;
@@ -40,7 +45,6 @@ class DeleteTask extends TaskEvent {
   List<Object> get props => [taskId];
 }
 
-// NEW: Event to trigger a nudge
 class SendNudge extends TaskEvent {
   const SendNudge(this.task);
   final Task task;
