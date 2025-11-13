@@ -24,8 +24,6 @@ class RoomDetailScreen extends StatelessWidget {
         user: user,
       )..add(const GetTasks()),
       child: Builder(
-        // This Builder is new. It provides a `context` that is
-        // "under" the BlocProvider, so the FAB can find the TaskBloc.
         builder: (context) {
           return Scaffold(
             appBar: AppBar(
@@ -40,13 +38,9 @@ class RoomDetailScreen extends StatelessWidget {
               ],
             ),
             body: const TaskListView(),
-            //
-            // THE FIX IS HERE
-            //
             floatingActionButton: FloatingActionButton(
               onPressed: () {
-                // Now this context can find the TaskBloc
-                showCreateTaskDialog(context);
+                showCreateTaskDialog(context, room.members);
               },
               child: const Icon(Icons.add),
             ),
