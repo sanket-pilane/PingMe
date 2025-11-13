@@ -31,9 +31,11 @@ class RoomListView extends StatelessWidget {
                 ),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  Navigator.of(
-                    context,
-                  ).push(RoomDetailScreen.route(room: room));
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => RoomDetailScreen(room: room),
+                    ),
+                  );
                 },
               ),
             );
