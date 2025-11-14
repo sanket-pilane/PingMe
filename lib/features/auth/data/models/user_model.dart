@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 
 class UserModel extends Equatable {
@@ -12,28 +11,11 @@ class UserModel extends Equatable {
     required this.username,
   });
 
-  factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final data = doc.data() as Map<String, dynamic>;
-    return UserModel(
-      uid: doc.id,
-      email: data['email'] ?? '',
-      username: data['username'] ?? '',
-    );
-  }
+  static const UserModel empty = UserModel(uid: '', email: '', username: '');
 
-  Map<String, dynamic> toFirestore() {
-    return {
-      'email': email,
-      'username': username,
-      'username_lowercase': username.toLowerCase(),
-    };
-  }
+  bool get isEmpty => this == empty;
+  bool get isNotEmpty => this != empty;
 
-  static const empty = UserModel(uid: '', email: '', username: '');
-  bool get isEmpty => this == UserModel.empty;
-  bool get isNotEmpty => this != UserModel.empty;
-
-  // --- THIS IS THE FIX ---
   UserModel copyWith({String? uid, String? email, String? username}) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -41,8 +23,19 @@ class UserModel extends Equatable {
       username: username ?? this.username,
     );
   }
-  // --- END OF FIX ---
+
+  factory UserModel.fromMap(Map<String, dynamic> map, String id) {
+    return UserModel(
+      uid: id,
+      email: map['email'] ?? '',
+      username: map['username'] ?? '',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {'email': email, 'username': username};
+  }
 
   @override
-  List<Object> get props => [uid, email, username];
+  List<Object?> get props => [uid, email, username];
 }
