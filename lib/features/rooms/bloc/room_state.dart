@@ -11,12 +11,12 @@ class RoomState extends Equatable {
   });
 
   final RoomStatus status;
-  final List<Room> rooms;
+  final List<RoomModel> rooms;
   final String? errorMessage;
 
   RoomState copyWith({
     RoomStatus? status,
-    List<Room>? rooms,
+    List<RoomModel>? rooms,
     String? errorMessage,
   }) {
     return RoomState(

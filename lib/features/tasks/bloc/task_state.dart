@@ -11,12 +11,12 @@ class TaskState extends Equatable {
   });
 
   final TaskStatus status;
-  final List<Task> tasks;
+  final List<TaskModel> tasks;
   final String? errorMessage;
 
   TaskState copyWith({
     TaskStatus? status,
-    List<Task>? tasks,
+    List<TaskModel>? tasks,
     String? errorMessage,
   }) {
     return TaskState(

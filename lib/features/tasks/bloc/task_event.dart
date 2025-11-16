@@ -8,25 +8,35 @@ abstract class TaskEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class GetTasks extends TaskEvent {
+  const GetTasks();
+}
+
 class TasksUpdated extends TaskEvent {
   const TasksUpdated(this.tasks);
-  final List<Task> tasks;
+  final List<TaskModel> tasks;
 
   @override
   List<Object> get props => [tasks];
 }
 
 class AddTask extends TaskEvent {
-  const AddTask(this.title);
+  const AddTask({
+    required this.title,
+    required this.assignedToUid,
+    required this.assignedToName,
+  });
   final String title;
+  final String assignedToUid;
+  final String assignedToName;
 
   @override
-  List<Object> get props => [title];
+  List<Object> get props => [title, assignedToUid, assignedToName];
 }
 
 class ToggleTaskCompletion extends TaskEvent {
   const ToggleTaskCompletion(this.task);
-  final Task task;
+  final TaskModel task;
 
   @override
   List<Object> get props => [task];
@@ -40,10 +50,9 @@ class DeleteTask extends TaskEvent {
   List<Object> get props => [taskId];
 }
 
-// NEW: Event to trigger a nudge
 class SendNudge extends TaskEvent {
   const SendNudge(this.task);
-  final Task task;
+  final TaskModel task;
 
   @override
   List<Object> get props => [task];

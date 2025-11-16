@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:pingme/features/rooms/bloc/room_bloc.dart';
 
-Future<void> showCreateRoomDialog(BuildContext context) {
+Future<void> showCreateRoomDialog(BuildContext context, RoomBloc read) {
   final controller = TextEditingController();
   final roomBloc = context.read<RoomBloc>();
 

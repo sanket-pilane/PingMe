@@ -24,17 +24,32 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
        _roomId = roomId,
        _user = user,
        super(const TaskState()) {
+    on<GetTasks>(_onGetTasks);
     on<TasksUpdated>(_onTasksUpdated);
     on<AddTask>(_onAddTask);
     on<ToggleTaskCompletion>(_onToggleTaskCompletion);
     on<DeleteTask>(_onDeleteTask);
     on<SendNudge>(_onSendNudge);
+  }
 
-    _tasksSubscription = _taskRepository.getTasksStream(_roomId).listen((
-      tasks,
-    ) {
-      add(TasksUpdated(tasks));
-    });
+  void _onGetTasks(GetTasks event, Emitter<TaskState> emit) {
+    emit(state.copyWith(status: TaskStatus.loading));
+    _tasksSubscription?.cancel();
+    _tasksSubscription = _taskRepository
+        .getTasksStream(_roomId)
+        .listen(
+          (tasks) {
+            add(TasksUpdated(tasks));
+          },
+          onError: (error) {
+            emit(
+              state.copyWith(
+                status: TaskStatus.failure,
+                errorMessage: error.toString(),
+              ),
+            );
+          },
+        );
   }
 
   void _onTasksUpdated(TasksUpdated event, Emitter<TaskState> emit) {
@@ -43,7 +58,13 @@ class TaskBloc extends Bloc<TaskEvent, TaskState> {
 
   Future<void> _onAddTask(AddTask event, Emitter<TaskState> emit) async {
     try {
-      await _taskRepository.createTask(_roomId, event.title, _user);
+      await _taskRepository.createTask(
+        _roomId,
+        event.title,
+        _user,
+        event.assignedToUid,
+        event.assignedToName,
+      );
     } catch (e) {
       emit(
         state.copyWith(status: TaskStatus.failure, errorMessage: e.toString()),

@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:pingme/features/auth/data/models/user_model.dart';
 import 'package:pingme/features/tasks/data/models/task_model.dart';
+import 'package:rxdart/rxdart.dart';
 
 class TaskRepository {
   final FirebaseFirestore _firestore;
@@ -8,25 +10,39 @@ class TaskRepository {
   TaskRepository({FirebaseFirestore? firestore})
     : _firestore = firestore ?? FirebaseFirestore.instance;
 
-  Stream<List<Task>> getTasksStream(String roomId) {
+  Stream<List<TaskModel>> getTasksStream(String roomId) {
     return _firestore
         .collection('rooms')
         .doc(roomId)
         .collection('tasks')
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map((snapshot) {
-          return snapshot.docs.map((doc) => Task.fromFirestore(doc)).toList();
+          final tasks = snapshot.docs
+              .map((doc) => TaskModel.fromFirestore(doc))
+              .toList();
+          tasks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          return tasks;
+        })
+        .onErrorReturnWith((error, stackTrace) {
+          print(error);
+          return [];
         });
   }
 
-  Future<void> createTask(String roomId, String title, UserModel user) async {
-    final newTask = Task(
-      id: '',
+  Future<void> createTask(
+    String roomId,
+    String title,
+    UserModel createdBy,
+    String assignedToUid,
+    String assignedToName,
+  ) async {
+    final newTask = TaskModel.empty.copyWith(
       title: title,
-      assignedToId: user.uid,
-      assignedToName: user.username,
       createdAt: DateTime.now(),
+      createdById: createdBy.uid,
+      createdByName: createdBy.username,
+      assignedToUid: assignedToUid,
+      assignedToName: assignedToName,
     );
 
     await _firestore
@@ -36,7 +52,7 @@ class TaskRepository {
         .add(newTask.toFirestore());
   }
 
-  Future<void> updateTask(String roomId, Task task) async {
+  Future<void> updateTask(String roomId, TaskModel task) async {
     await _firestore
         .collection('rooms')
         .doc(roomId)
@@ -54,7 +70,7 @@ class TaskRepository {
         .delete();
   }
 
-  Future<void> sendNudge(String roomId, Task task) async {
+  Future<void> sendNudge(String roomId, TaskModel task) async {
     final updatedTask = task.copyWith(needsNudge: true);
     await updateTask(roomId, updatedTask);
   }
