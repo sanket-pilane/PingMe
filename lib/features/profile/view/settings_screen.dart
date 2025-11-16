@@ -14,17 +14,29 @@ class SettingsCubit extends Cubit<UserModel> {
        super(initialUser);
 
   void onUsernameChanged(String username) {
-    // This will now work because user_model.dart has copyWith
     emit(state.copyWith(username: username));
   }
+
+  // --- ADDED METHODS ---
+  void onFullNameChanged(String fullName) {
+    emit(state.copyWith(fullName: fullName));
+  }
+
+  void onBioChanged(String bio) {
+    emit(state.copyWith(bio: bio));
+  }
+  // --- END OF ADD ---
 
   Future<void> onSave() async {
     try {
       // --- THIS IS THE FIX ---
       // We now pass named arguments, not the whole state object.
+      // --- UPDATED ---
       await _authRepository.updateUserProfile(
         uid: state.uid,
         username: state.username,
+        fullName: state.fullName, // Pass new data
+        bio: state.bio, // Pass new data
       );
       // --- END OF FIX ---
     } catch (e) {
@@ -60,9 +72,9 @@ class SettingsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<SettingsCubit>();
-    final username = context.select(
-      (SettingsCubit cubit) => cubit.state.username,
-    );
+
+    // --- UPDATED to listen to the whole user object ---
+    final user = context.select((SettingsCubit cubit) => cubit.state);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
@@ -71,13 +83,35 @@ class SettingsView extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
-              initialValue: username,
+              initialValue: user.username, // --- UPDATED ---
               onChanged: (value) => cubit.onUsernameChanged(value),
               decoration: const InputDecoration(
                 labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
             ),
+            const SizedBox(height: 16), // --- ADDED FIELDS ---
+            TextFormField(
+              initialValue: user.fullName,
+              onChanged: (value) => cubit.onFullNameChanged(value),
+              decoration: const InputDecoration(
+                labelText: 'Full Name',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              initialValue: user.bio,
+              onChanged: (value) => cubit.onBioChanged(value),
+              decoration: const InputDecoration(
+                labelText: 'Bio',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: 3,
+            ),
+            // --- END OF ADD ---
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () {

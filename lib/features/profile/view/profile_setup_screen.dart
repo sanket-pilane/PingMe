@@ -12,11 +12,17 @@ class ProfileSetupScreen extends StatefulWidget {
 }
 
 class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
-  final _controller = TextEditingController();
+  // --- UPDATED CONTROLLERS ---
+  final _usernameController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _bioController = TextEditingController();
+  // --- END OF UPDATE ---
 
   @override
   void dispose() {
-    _controller.dispose();
+    _usernameController.dispose();
+    _fullNameController.dispose(); // --- ADDED ---
+    _bioController.dispose(); // --- ADDED ---
     super.dispose();
   }
 
@@ -43,25 +49,49 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Welcome! Choose a username to continue.',
+                'Welcome! Complete your profile to continue.', // --- UPDATED ---
                 style: Theme.of(context).textTheme.titleLarge,
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               TextField(
-                controller: _controller,
+                controller: _usernameController, // --- UPDATED ---
                 decoration: const InputDecoration(
                   labelText: 'Username',
                   border: OutlineInputBorder(),
                 ),
               ),
+              const SizedBox(height: 16), // --- ADDED FIELDS ---
+              TextField(
+                controller: _fullNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Full Name',
+                  border: OutlineInputBorder(),
+                ),
+                textCapitalization: TextCapitalization.words,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _bioController,
+                decoration: const InputDecoration(
+                  labelText: 'Bio (Optional)',
+                  border: OutlineInputBorder(),
+                ),
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 3,
+              ),
+              // --- END OF ADD ---
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () {
-                  if (_controller.text.isNotEmpty) {
+                  // --- UPDATED LOGIC ---
+                  if (_usernameController.text.isNotEmpty &&
+                      _fullNameController.text.isNotEmpty) {
                     context.read<AuthRepository>().updateUserProfile(
                       uid: authUser.uid,
-                      username: _controller.text,
+                      username: _usernameController.text.trim(),
+                      fullName: _fullNameController.text.trim(),
+                      bio: _bioController.text.trim(),
                     );
                     // Firestore write will update the stream -> AuthBloc -> triggers the listener above
                   }
