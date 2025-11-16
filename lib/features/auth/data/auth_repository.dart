@@ -14,13 +14,11 @@ class AuthRepository {
   }) : _firebaseAuth = firebaseAuth ?? firebase_auth.FirebaseAuth.instance,
        _firestore = firestore ?? FirebaseFirestore.instance;
 
-  // --- THIS IS THE NEW LIVE STREAM LOGIC ---
   Stream<UserModel> get user {
     return _firebaseAuth.authStateChanges().switchMap((firebaseUser) {
       if (firebaseUser == null) {
         return Stream.value(UserModel.empty);
       } else {
-        // This stream will fire immediately, AND every time the doc changes
         return _firestore
             .collection('users')
             .doc(firebaseUser.uid)
@@ -29,7 +27,6 @@ class AuthRepository {
               if (snapshot.exists) {
                 return UserModel.fromFirestore(snapshot);
               } else {
-                // Create the doc if it doesn't exist (e.g., first sign up)
                 final newUser = UserModel(
                   uid: firebaseUser.uid,
                   email: firebaseUser.email ?? '',
@@ -45,7 +42,6 @@ class AuthRepository {
       }
     });
   }
-  // --- END OF NEW STREAM LOGIC ---
 
   Future<void> signUp({required String email, required String password}) async {
     try {

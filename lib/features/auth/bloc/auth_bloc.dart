@@ -20,9 +20,48 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     _userSubscription = _authRepository.user.listen((user) {
       add(AuthUserChanged(user: user));
     });
+    on<AuthSignUpRequested>((event, emit) async {
+      emit(const AuthState.loading());
+      debugPrint('AuthBloc: AuthSignUpRequested -> email: ${event.email}');
+      try {
+        await _authRepository.signUp(
+          email: event.email,
+          password: event.password,
+        );
+
+        debugPrint(
+          'AuthBloc: signUp completed, waiting for auth stream update...',
+        );
+      } catch (e, st) {
+        debugPrint('AuthBloc: signUp error: $e\n$st');
+        emit(AuthState.failure(e.toString()));
+      }
+    });
+    on<AuthLogInRequested>((event, emit) async {
+      emit(const AuthState.loading());
+      debugPrint('AuthBloc: AuthLogInRequested -> email: ${event.email}');
+      try {
+        await _authRepository.logInWithEmailAndPassword(
+          email: event.email,
+          password: event.password,
+        );
+        debugPrint(
+          'AuthBloc: login completed, waiting for auth stream update...',
+        );
+      } catch (e, st) {
+        debugPrint('AuthBloc: login error: $e\n$st');
+        emit(AuthState.failure(e.toString()));
+      }
+    });
 
     on<AuthUserChanged>((event, emit) {
-      // Check if the user is NOT empty
+      debugPrint(
+        'AuthBloc: AuthUserChanged event.user => uid: "${event.user.uid}", email: "${event.user.email}", username: "${event.user.username}"',
+      );
+      debugPrint(
+        'AuthBloc: isEmpty=${event.user.isEmpty}, isNotEmpty=${event.user.isNotEmpty}',
+      );
+
       if (event.user.isNotEmpty) {
         emit(AuthState.authenticated(user: event.user));
       } else {
